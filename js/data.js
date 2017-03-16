@@ -1,6 +1,4 @@
 
-
-
 var dObj = false;
 
 var parseDataString = function (str) {

@@ -1,7 +1,45 @@
+var current_dObj = dObj;
+var dropDownValue = "";
+var dayStep = 21;
+var hourStep = 2 / 3;
+
+// When the dropdown changes
+var dropDownChanged = function (evt) {
+    var selectedThing = evt.target.options[evt.target.options.selectedIndex];
+    var selectedValue = selectedThing.value;
+    dropDownValue = selectedValue;
+
+    onDataLoaded(current_dObj);
+}
+
+var incHour = function (evt) {
+    if (hourStep > 3) return;
+    hourStep += 1 / 3;
+    onDataLoaded(current_dObj);
+}
+var decHour = function (evt) {
+    if (hourStep < 19 / 30) return;
+    hourStep -= 1 / 3;
+    onDataLoaded(current_dObj);
+}
+
+var incDay = function (evt) {
+    if (dayStep > 30) return;
+    dayStep++;
+    onDataLoaded(current_dObj);
+}
+var decDay = function (evt) {
+    if (dayStep < 3) return;
+    dayStep--;
+    onDataLoaded(current_dObj);
+}
 
 
+
+// On Data Loaded Function
 function onDataLoaded(dObj) {
-    //console.log("data is loaded, i'm ready to go!");
+    d3.selectAll("svg").remove();
+    current_dObj = dObj;
 
     // create a location object
     var location = {
@@ -14,13 +52,7 @@ function onDataLoaded(dObj) {
     var margin = 40;
     // Radius of Sun Path Diagram
     var radius = 200
-    // Art Board
-    var board = dY.graph.addBoard("#dy-canvas-winter", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
 
-    // Board for SunPath
-    var sunPath = board.g.append("g")
-        .attr("transform", "translate(" + radius + "," + radius + ") ")
-        .attr({ class: "background" });
 
     // Scale color
     var cScale = d3.scale.linear()
@@ -44,34 +76,15 @@ function onDataLoaded(dObj) {
         .angle(function (d) { return angScale(d.azimuthDeg); })
         .interpolate("linear");
 
-    // create bins
-    var bins = [];
 
+    // ****************************************************************
+    // WINTER - SPRING
+    // ****************************************************************
 
+    // Create winterBins
+    var winterBins = [];
 
-
-    // Testing
-    // var startDay = 85;
-    // var endDay = 105;
-    // var startHour = 10;
-    // var endHour = 14;
-
-    // var newBin = new bin(lat, lon, tmz, startDay, endDay, startHour, endHour);
-
-    // console.log(newBin.binIsVisible());
-
-    // if (newBin.binIsVisible()) {
-    //     bins.push(newBin);
-    //     newBin.generateSolarGeo();
-    // }
-
-
-    //console.log(dObj);
-
-    var dayStep = 10;
-    var hourStep = 1 / 3.5;
-
-    for (var d = 2; d < 351; d += dayStep) {
+    for (var d = 0; d < 172; d += dayStep) {
         for (var h = 0; h < 22; h += hourStep) {
             var newBin = new bin(location, d, d + dayStep, h, h + hourStep);
             if (newBin.isVisible()) {
@@ -85,23 +98,29 @@ function onDataLoaded(dObj) {
                         // sum data over range
                         var dayOfYear = d_v * 24 + h_v;
                         var tick = dObj.ticks[dayOfYear];
-                        val += tick.valueOf("DryBulbTemp");
+                        // val += tick.valueOf("DryBulbTemp");
+                        val += tick.valueOf(dropDownValue);
                         count++;
                     }
                 }
                 // average the data value
                 newBin.solarPath.value = 25 - val / count;
-                bins.push(newBin);
+                winterBins.push(newBin);
             }
         }
     }
-    //console.log(bins);
 
+    // Art Board
+    var board = dY.graph.addBoard("#dy-canvas-winter", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
 
+    // Board for SunPath
+    var sunPathWinter = board.g.append("g")
+        .attr("transform", "translate(" + radius + "," + radius + ") ")
+        .attr({ class: "background" });
 
-    // draw the bins
-    sunPath.append("g").selectAll("path")
-        .data(bins)
+    // draw the winterBins
+    sunPathWinter.append("g").selectAll("path")
+        .data(winterBins)
         .enter().append("path")
         .datum(function (d) { return d.solarPath; })
         .attr({
@@ -109,23 +128,96 @@ function onDataLoaded(dObj) {
             class: "bin",
             fill: function (d) { return cScale(d.value); }
         })
-        .on("mouseenter", function (d) {
-            d3.select(this).style("stroke-width", "1px");
-        })
-        .on("mouseoout", function (d) {
-            d3.select(this).style("stroke-width", "0.1px");
-        })
-        ;
+    // .on("mouseenter", function (d) {
+    //     d3.select(this).style("stroke-width", "1px");
+    // })
+    // .on("mouseoout", function (d) {
+    //     d3.select(this).style("stroke-width", "0.1px");
+    // })
+    // ;
     //.on("mouseout", function (d) { d3.select(this).attr({ class: "bin" }); });
 
     // draw the circle
-    var axisCirc = sunPath.append("g").attr("class", "axis")
+    var axisCirc = sunPathWinter.append("g").attr("class", "axis")
     axisCirc.append("circle")
         .attr({
             cx: 4,
             r: radius
         });
 
-    //console.log(solarTime(location, 150, 13));
+    // ****************************************************************
+    // SUMMER - FALL
+    // ****************************************************************
+
+    // Create SummerBins
+    var summerBins = [];
+
+    for (var d = 172; d < 351; d += dayStep) {
+        for (var h = 0; h < 22; h += hourStep) {
+            var newBin = new bin(location, d, d + dayStep, h, h + hourStep);
+            if (newBin.isVisible()) {
+                newBin.generateSolarPath(5);
+
+                // iterate over data values in range
+                var val = 0;
+                var count = 0;
+                for (var d_v = Math.floor(d); d_v < Math.floor(d) + dayStep; d_v++) {
+                    for (var h_v = Math.floor(h); h_v < Math.floor(h) + hourStep; h_v++) {
+                        // sum data over range
+                        var dayOfYear = d_v * 24 + h_v;
+                        var tick = dObj.ticks[dayOfYear];
+                        // val += tick.valueOf("DryBulbTemp");
+                        val += tick.valueOf(dropDownValue);
+                        count++;
+                    }
+                }
+                // average the data value
+                newBin.solarPath.value = 25 - val / count;
+                summerBins.push(newBin);
+            }
+        }
+    }
+
+    // Art Board
+    var board = dY.graph.addBoard("#dy-canvas-summer", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
+
+    // Board for SunPath
+    var sunPathSummer = board.g.append("g")
+        .attr("transform", "translate(" + radius + "," + radius + ") ")
+        .attr({ class: "background" });
+
+    // draw the summerBins
+    sunPathSummer.append("g").selectAll("path")
+        .data(summerBins)
+        .enter().append("path")
+        .datum(function (d) { return d.solarPath; })
+        .attr({
+            d: pathLine,
+            class: "bin",
+            fill: function (d) { return cScale(d.value); }
+        })
+    // .on("mouseenter", function (d) {
+    //     d3.select(this).style("stroke-width", "1px");
+    // })
+    // .on("mouseoout", function (d) {
+    //     d3.select(this).style("stroke-width", "0.1px");
+    // })
+    // ;
+    //.on("mouseout", function (d) { d3.select(this).attr({ class: "bin" }); });
+
+    // draw the circle
+    var axisCirc = sunPathSummer.append("g").attr("class", "axis")
+    axisCirc.append("circle")
+        .attr({
+            cx: 4,
+            r: radius
+        });
+
+
+
+
+
+
+
 }
 

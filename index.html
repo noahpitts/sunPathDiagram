@@ -38,8 +38,9 @@
   <script src="./js/d3.v3.min.js"></script>
   <script src="./js/dy.v0.min.js"></script>
   <script src="./js/sunpath.js"></script>
-  <script src="./js/script.js"></script>
   <script src="./js/data.js"></script>
+  <script src="./js/script.js"></script>
+
 
 </head>
 
@@ -82,6 +83,24 @@
       </script>
 
       <!--SELECT DATA TYPE-->
+      <select id="drpdown">
+        <option value="DryBulbTemp">Dry Bulb Temperature</option>
+        <option value="RelHumid">Relitive Humidity</option>
+        <option value="Pressure">Pressure</option>
+        <option value="DewPtTemp">Dew Point Temperature</option>
+        <option value="WindSpd">Wind Speed</option>
+        <option value="GblHorzIrad">Global Horizontal Irradiance</option>
+        <option value="DirNormIrad">Direct Normal Irradiance</option>
+        <option value="DifHorzIrad">Diffuse Horizontal Irradiance</option>
+        <option value="GblHorzIllum">Global Horizontal Illuminance</option>
+        <option value="DirNormIllum">Direct Normal Illuminance</option>
+        <option value="DifHorzIllum">Diffuse Horizontal Illuminance</option>
+        <option value="TotSkyCvr">Total Sky Cover</option>
+      </select>
+
+      <script>
+        $(document).ready(function () { $("#drpdown").change(dropDownChanged); });
+      </script>
 
     </div>
 
@@ -92,7 +111,7 @@
 
     <!--Load Initial Data-->
     <script>
-      onDataLoaded(dObj);
+        onDataLoaded(dObj);
     </script>
 
   </div>
