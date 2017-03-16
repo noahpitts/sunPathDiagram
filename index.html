@@ -60,15 +60,14 @@
     <!--Sun Path Diagrams-->
     <div class="row diagram-bar">
       <!--Winter-->
-      <div class="half column border">
+      <div class="half column">
         <div id="dy-canvas-winter" style="text-align:center"></div>
-        <h4 style="text-align:center">Winter </h4>
-
+        <div id="dy-canvas-summer" style="text-align:center"></div>
       </div>
 
       <!--Summer-->
       <div class="half column">
-        <div id="dy-canvas-summer" style="text-align:center"></div>
+
       </div>
 
     </div>
@@ -77,13 +76,13 @@
     <div class="row" style="text-align:center">
 
       <!--LOAD EPW-->
-      <input class="five columns" id="csv-file" type="file" name="files">
+      <input class="six columns" id="csv-file" type="file" name="files">
       <script>
         $(document).ready(function () { $("#csv-file").change(dY.parser.handleSingleEPWFileUpload); });
       </script>
 
       <!--SELECT DATA TYPE-->
-      <select id="drpdown">
+      <select class="six columns" id="drpdown">
         <option value="DryBulbTemp">Dry Bulb Temperature</option>
         <option value="RelHumid">Relitive Humidity</option>
         <option value="Pressure">Pressure</option>
@@ -97,14 +96,28 @@
         <option value="DifHorzIllum">Diffuse Horizontal Illuminance</option>
         <option value="TotSkyCvr">Total Sky Cover</option>
       </select>
-
       <script>
         $(document).ready(function () { $("#drpdown").change(dropDownChanged); });
       </script>
 
     </div>
+    <!--INC/DEC HOUR/DAY-->
 
+    <div class="row" style="text-align:center">
 
+      <button class="button three columns" id="inc-day">Day +</button>
+      <button class="button three columns" id="dec-day">Day -</button>
+      <button class="button three columns" id="inc-hour">Hour +</button>
+      <button class="button three columns" id="dec-hour">Hour -</button>
+
+      <script>
+        $(document).ready(function () { $("#inc-day").click(incDay); });
+        $(document).ready(function () { $("#dec-day").click(decDay); });
+        $(document).ready(function () { $("#inc-hour").click(incHour); });
+        $(document).ready(function () { $("#dec-hour").click(decHour); });
+      </script>
+
+    </div>
 
 
 

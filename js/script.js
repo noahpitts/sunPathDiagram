@@ -1,7 +1,12 @@
 var current_dObj = dObj;
-var dropDownValue = "";
+var dropDownValue = "DryBulbTemp";
 var dayStep = 21;
-var hourStep = 2 / 3;
+var hourStep = 5 / 3;
+
+// Margin around Sun Path Diagram
+var margin = 40;
+// Radius of Sun Path Diagram
+var radius = 250
 
 // When the dropdown changes
 var dropDownChanged = function (evt) {
@@ -12,25 +17,29 @@ var dropDownChanged = function (evt) {
     onDataLoaded(current_dObj);
 }
 
-var incHour = function (evt) {
+var incHour = function () {
     if (hourStep > 3) return;
     hourStep += 1 / 3;
+    console.log(hourStep);
     onDataLoaded(current_dObj);
 }
-var decHour = function (evt) {
+var decHour = function () {
     if (hourStep < 19 / 30) return;
     hourStep -= 1 / 3;
+    console.log(hourStep);
     onDataLoaded(current_dObj);
 }
 
-var incDay = function (evt) {
-    if (dayStep > 30) return;
+var incDay = function () {
+    if (dayStep > 20) return;
     dayStep++;
+    console.log(dayStep);
     onDataLoaded(current_dObj);
 }
-var decDay = function (evt) {
+var decDay = function () {
     if (dayStep < 3) return;
     dayStep--;
+    console.log(dayStep);
     onDataLoaded(current_dObj);
 }
 
@@ -48,17 +57,7 @@ function onDataLoaded(dObj) {
         tmz: dObj.location.timezone
     };
 
-    // Margin around Sun Path Diagram
-    var margin = 40;
-    // Radius of Sun Path Diagram
-    var radius = 200
 
-
-    // Scale color
-    var cScale = d3.scale.linear()
-        .domain([-10, 10])
-        .interpolate(d3.interpolate)
-        .range([d3.rgb("#20ccee"), d3.rgb('#303030')]);
 
     // Scales the value to polar coordinate theta
     var angScale = d3.scale.linear()
@@ -76,10 +75,8 @@ function onDataLoaded(dObj) {
         .angle(function (d) { return angScale(d.azimuthDeg); })
         .interpolate("linear");
 
-
-    // ****************************************************************
-    // WINTER - SPRING
-    // ****************************************************************
+    var vals = [];
+    // Create Bins
 
     // Create winterBins
     var winterBins = [];
@@ -98,17 +95,62 @@ function onDataLoaded(dObj) {
                         // sum data over range
                         var dayOfYear = d_v * 24 + h_v;
                         var tick = dObj.ticks[dayOfYear];
-                        // val += tick.valueOf("DryBulbTemp");
                         val += tick.valueOf(dropDownValue);
                         count++;
                     }
                 }
                 // average the data value
-                newBin.solarPath.value = 25 - val / count;
+                val /= count;
+                vals.push(val);
+                newBin.solarPath.value = val;
                 winterBins.push(newBin);
             }
         }
     }
+
+    // Create SummerBins
+    var summerBins = [];
+
+    for (var d = 172; d < 351; d += dayStep) {
+        for (var h = 0; h < 22; h += hourStep) {
+            var newBin = new bin(location, d, d + dayStep, h, h + hourStep);
+            if (newBin.isVisible()) {
+                newBin.generateSolarPath(5);
+
+                // iterate over data values in range
+                var val = 0;
+                var count = 0;
+                for (var d_v = Math.floor(d); d_v < Math.floor(d) + dayStep; d_v++) {
+                    for (var h_v = Math.floor(h); h_v < Math.floor(h) + hourStep; h_v++) {
+                        // sum data over range
+                        var dayOfYear = d_v * 24 + h_v;
+                        var tick = dObj.ticks[dayOfYear];
+                        val += tick.valueOf(dropDownValue);
+                        count++;
+                    }
+                }
+                // average the data value
+                val /= count;
+                vals.push(val);
+                newBin.solarPath.value = val;
+                summerBins.push(newBin);
+            }
+        }
+    }
+
+    var maxVal = d3.max(vals);
+    var minVal = d3.min(vals);
+    console.log(minVal, maxVal);
+
+    // Scale color
+    var cScale = d3.scale.linear()
+        .domain([minVal, maxVal])
+        .interpolate(d3.interpolate)
+        .range([d3.rgb(30, 30, 30), d3.rgb(30, 150, 210)]);
+
+    // ****************************************************************
+    // WINTER - SPRING
+    // ****************************************************************
 
     // Art Board
     var board = dY.graph.addBoard("#dy-canvas-winter", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
@@ -149,34 +191,7 @@ function onDataLoaded(dObj) {
     // SUMMER - FALL
     // ****************************************************************
 
-    // Create SummerBins
-    var summerBins = [];
 
-    for (var d = 172; d < 351; d += dayStep) {
-        for (var h = 0; h < 22; h += hourStep) {
-            var newBin = new bin(location, d, d + dayStep, h, h + hourStep);
-            if (newBin.isVisible()) {
-                newBin.generateSolarPath(5);
-
-                // iterate over data values in range
-                var val = 0;
-                var count = 0;
-                for (var d_v = Math.floor(d); d_v < Math.floor(d) + dayStep; d_v++) {
-                    for (var h_v = Math.floor(h); h_v < Math.floor(h) + hourStep; h_v++) {
-                        // sum data over range
-                        var dayOfYear = d_v * 24 + h_v;
-                        var tick = dObj.ticks[dayOfYear];
-                        // val += tick.valueOf("DryBulbTemp");
-                        val += tick.valueOf(dropDownValue);
-                        count++;
-                    }
-                }
-                // average the data value
-                newBin.solarPath.value = 25 - val / count;
-                summerBins.push(newBin);
-            }
-        }
-    }
 
     // Art Board
     var board = dY.graph.addBoard("#dy-canvas-summer", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
