@@ -6,7 +6,7 @@
 
 .axis path, .axis line, .axis, .outer-arc {
   stroke: rgb(30,30,30);
-  stroke-width: 0.5px;
+  stroke-width: 0.25px;
   fill: none;
 }
 

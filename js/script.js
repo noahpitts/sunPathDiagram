@@ -160,16 +160,7 @@ function onDataLoaded(dObj) {
         .attr("transform", "translate(" + radius + "," + radius + ") ")
         .attr({ class: "background" });
 
-    // draw the winterBins
-    sunPathWinter.append("g").selectAll("path")
-        .data(winterBins)
-        .enter().append("path")
-        .datum(function (d) { return d.solarPath; })
-        .attr({
-            d: pathLine,
-            class: "bin",
-            fill: function (d) { return cScale(d.value); }
-        })
+
     // .on("mouseenter", function (d) {
     //     d3.select(this).style("stroke-width", "1px");
     // })
@@ -183,16 +174,62 @@ function onDataLoaded(dObj) {
     var axisCirc = sunPathWinter.append("g").attr("class", "axis")
     axisCirc.append("circle")
         .attr({
-            cx: 4,
+            cx: 0,
             r: radius
         });
+    var axisCen = sunPathWinter.append("g").attr("class", "axis")
+    axisCirc.append("circle")
+        .attr({
+            cx: 0,
+            r: radius * 0.01
+        });
+    // radial arc
+    var startAngle = Math.PI / 4;
+    var endAngle = 7 * Math.PI / 4;
+    var resolution = (endAngle - startAngle) / (2 * Math.PI) * 360;
+    // startAngle += Math.PI / 2;
+    // endAngle += Math.PI / 2;
+    var angle = d3.scale.linear()
+        .domain([0, resolution - 1])
+        .range([startAngle, endAngle]);
+
+    var line = d3.svg.line.radial()
+        .interpolate("basis")
+        .tension(0)
+        .radius(radius * 1.05)
+        .angle(function (d, i) { return angle(i); });
+
+    var arcPathSum = sunPathWinter.append("g").attr("class", "axis");
+    arcPathSum.append("path")
+        .datum(d3.range(resolution))
+        .attr("d", line);
+
+    // draw the text
+    var angAxisGroups = sunPathWinter.append("g") // angAxisGroups is a reference to a collection of subgroups within this group. each subgroup has data bound to it related to one of 12 values: angles between 0 and 360
+        .attr("class", "axis")
+        .selectAll("g")
+        .data(d3.range(0, 360, 15)) // bind 12 data objects (0-360 in steps of x)
+        .enter().append("g")
+        .attr("transform", function (d) { return "rotate(" + d + ")"; }); // rotate each subgroup about the origin by the proper angle
+    var ctrOffset = radius / 5;
+    angAxisGroups.append("line") // append a line to each
+        .attr("x1", ctrOffset) // we only need to define x1 and x2, allowing y0 and y1 to default to 0
+        .attr("x2", radius * 1.1);
+
+    // draw the winterBins
+    sunPathWinter.append("g").selectAll("path")
+        .data(winterBins)
+        .enter().append("path")
+        .datum(function (d) { return d.solarPath; })
+        .attr({
+            d: pathLine,
+            class: "bin",
+            fill: function (d) { return cScale(d.value); }
+        })
 
     // ****************************************************************
     // SUMMER - FALL
     // ****************************************************************
-
-
-
     // Art Board
     var board = dY.graph.addBoard("#dy-canvas-summer", { inWidth: radius * 2, inHeight: radius * 2, margin: margin });
 
@@ -200,6 +237,74 @@ function onDataLoaded(dObj) {
     var sunPathSummer = board.g.append("g")
         .attr("transform", "translate(" + radius + "," + radius + ") ")
         .attr({ class: "background" });
+
+
+
+    // .on("mouseenter", function (d) {
+    //     d3.select(this).style("stroke-width", "1px");
+    // })
+    // .on("mouseoout", function (d) {
+    //     d3.select(this).style("stroke-width", "0.1px");
+    // })
+    // ;
+    //.on("mouseout", function (d) { d3.select(this).attr({ class: "bin" }); });
+
+    // draw the circle
+    var axisCircSum = sunPathSummer.append("g").attr("class", "axis")
+    axisCircSum.append("circle")
+        .attr({
+            cx: 0,
+            r: radius
+        });
+
+    var axisCenSum = sunPathSummer.append("g").attr("class", "axis")
+    axisCenSum.append("circle")
+        .attr({
+            cx: 0,
+            r: radius * 0.01
+        });
+
+
+    // radial arc
+    var startAngle = Math.PI / 4;
+    var endAngle = 7 * Math.PI / 4;
+    var resolution = (endAngle - startAngle) / (2 * Math.PI) * 360;
+    // startAngle += Math.PI / 2;
+    // endAngle += Math.PI / 2;
+    var angle = d3.scale.linear()
+        .domain([0, resolution - 1])
+        .range([startAngle, endAngle]);
+
+    var line = d3.svg.line.radial()
+        .interpolate("basis")
+        .tension(0)
+        .radius(radius * 1.05)
+        .angle(function (d, i) { return angle(i); });
+
+    var arcPathSum = sunPathSummer.append("g").attr("class", "axis");
+    arcPathSum.append("path")
+        .datum(d3.range(resolution))
+        .attr("d", line);
+
+    // draw the text
+    var angAxisGroups = sunPathSummer.append("g") // angAxisGroups is a reference to a collection of subgroups within this group. each subgroup has data bound to it related to one of 12 values: angles between 0 and 360
+        .attr("class", "axis")
+        .selectAll("g")
+        .data(d3.range(0, 360, 15)) // bind 12 data objects (0-360 in steps of x)
+        .enter().append("g")
+        .attr("transform", function (d) { return "rotate(" + d + ")"; }); // rotate each subgroup about the origin by the proper angle
+    var ctrOffset = radius / 5;
+    angAxisGroups.append("line") // append a line to each
+        .attr("x1", ctrOffset) // we only need to define x1 and x2, allowing y0 and y1 to default to 0
+        .attr("x2", radius * 1.1);
+
+    // var textPadding = 10;
+    // angAxisGroups.append("text") // append some text to each
+    //     .attr("x", radius + textPadding * 2)
+    //     .attr("dy", textPadding / 2) // nudge text down a bit
+    //     .style("text-anchor", function (d) { return d > 180 ? "end" : null; })
+    //     .attr("transform", function (d) { return d > 180 ? "rotate(180 " + (radius + textPadding * 2) + ",0)" : null; })
+    //     .text(function (d) { return d > 270 ? null : d; });
 
     // draw the summerBins
     sunPathSummer.append("g").selectAll("path")
@@ -211,28 +316,6 @@ function onDataLoaded(dObj) {
             class: "bin",
             fill: function (d) { return cScale(d.value); }
         })
-    // .on("mouseenter", function (d) {
-    //     d3.select(this).style("stroke-width", "1px");
-    // })
-    // .on("mouseoout", function (d) {
-    //     d3.select(this).style("stroke-width", "0.1px");
-    // })
-    // ;
-    //.on("mouseout", function (d) { d3.select(this).attr({ class: "bin" }); });
-
-    // draw the circle
-    var axisCirc = sunPathSummer.append("g").attr("class", "axis")
-    axisCirc.append("circle")
-        .attr({
-            cx: 4,
-            r: radius
-        });
-
-
-
-
-
-
 
 }
 
