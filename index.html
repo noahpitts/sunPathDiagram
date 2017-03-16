@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- HEAD
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+
+<head>
+
+  <!-- Basic Page Sutup for Mobile
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>Sun Path Diagram</title>
+  <meta name="description" content="Sun Path Diagram Web App for Arch 229-003">
+  <meta name="author" content="Noah Pitts">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <!--<link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">-->
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sunpath.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="img/favicon.png">
+
+  <!-- JS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <script src="./js/jquery-3.1.1.min.js"></script>
+  <script src="./js/d3.v3.min.js"></script>
+  <script src="./js/dy.v0.min.js"></script>
+  <script src="./js/sunpath.js"></script>
+  <script src="./js/script.js"></script>
+  <script src="./js/data.js"></script>
+
+</head>
+
+<body>
+
+  <!-- Primary Content
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+
+    <!--Title Bar-->
+    <div class="row title-bar">
+      <!--Name-->
+      <h2 class="title">SUN PATH DIAGRAM</h2>
+      <h6 class="title">Noah Pitts | Arch 229-003</h6>
+    </div>
+
+    <!--Sun Path Diagrams-->
+    <div class="row diagram-bar">
+      <!--Winter-->
+      <div class="half column border">
+        <div id="dy-canvas-winter" style="text-align:center"></div>
+        <h4 style="text-align:center">Winter </h4>
+
+      </div>
+
+      <!--Summer-->
+      <div class="half column">
+        <div id="dy-canvas-summer" style="text-align:center"></div>
+      </div>
+
+    </div>
+
+    <!--Control-->
+    <div class="row" style="text-align:center">
+
+      <!--LOAD EPW-->
+      <input class="five columns" id="csv-file" type="file" name="files">
+      <script>
+        $(document).ready(function () { $("#csv-file").change(dY.parser.handleSingleEPWFileUpload); });
+      </script>
+
+      <!--SELECT DATA TYPE-->
+
+    </div>
+
+
+
+
+
+
+    <!--Load Initial Data-->
+    <script>
+      onDataLoaded(dObj);
+    </script>
+
+  </div>
+
+  <!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+
+</html>
